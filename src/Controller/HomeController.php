@@ -82,13 +82,10 @@ class HomeController extends AbstractController
         echo $res->getBody();
     }
 
-    /**
-     * @Route("/sig", name="sig")
-     */
-    public function makeSig()
+    public function makeSig($param)
     {
         // Prepare data
-        $param = array(
+        /* $param = array(
             'message' => 'hello world',
             'amount'   => '12.20',
             'currency' => 'EUR',
@@ -96,7 +93,7 @@ class HomeController extends AbstractController
             "recipient" => "+33600000001",
             "vendor_token" => "xx",
             "user_token" => "+33600000001"
-        );
+        ); */
 
         ksort($param); // alphabetical sorting
 
@@ -105,17 +102,132 @@ class HomeController extends AbstractController
         foreach ($param as $key => $val) {
             $sig[] .= $key.'='.$val;
         }
-        
-        
+                
         // Concat the private token (provider one or vendor one) and has the result
-        $callSig = md5(implode("&", $sig)."xx");
+        $callSig = md5(implode("&", $sig)."58xx");
 
-        return $this->render('base.html.twig', [
-            'callSig' => $callSig,
+        return $callSig;
+    }
+
+    /**
+     * @Route("/register", name="register")
+     */
+    public function register()
+    {
+        $client = new httpClient();
+        $param = array(
+            'vendor_token' => '58xx',
+            'firstname' => 'jb',
+            'lastname' => 'test',
+            'email'   => 'user@email.com',
+            'phone' => '0606060606',
+            'password' => 'password',
+        );
+        
+        $param['signature'] = $this->makeSig($param);
+
+        $res = $client->request('POST', 'https://homologation.lydia-app.com/api/auth/register.json', $param);
+
+        //return new Response();
+        return $this->render('home/result.html.twig', [
+            'response' => $res,
             'param' => $param
-        ]);
-
+        ]); 
     }
     
+    /**
+     * @Route("/create_account", name="create_account")
+     */
+    public function create_account()
+    {
+        $client = new httpClient();
+        $sigParam = array(
+            'firstname' => 'jb',
+            'lastname' => 'test',
+            'email'   => 'user@email.com',
+            'phone' => '+33606060606'
+        );
 
+        $param = array(
+            'vendor_token' => '58xx',
+            'firstname' => 'jb',
+            'lastname' => 'test',
+            'email'   => 'user@email.com',
+            'phone' => '+33606060606',
+            'password' => 'password',
+            'provider_token' => '58xx'
+        );
+        
+        $param['signature'] = $this->makeSig($sigParam);
+
+        $res = $client->request('POST', 'https://homologation.lydia-app.com/api/auth/create_account.json', $param);
+
+        //return new Response();
+        return $this->render('home/result.html.twig', [
+            'response' => $res,
+            'param' => $param
+        ]); 
+    }
+
+/**
+     * @Route("/request_do", name="request_do")
+     */
+    public function request_do()
+    {
+        $client = new httpClient();
+        $sigParam = array(
+            'amount'   => '12.20',
+            'vendor_token' => '58xx',
+            'user_token' => '+33606060606',
+            'recipient' => '+33606060606',
+            'message' => 'hello',
+            'currency' => 'EUR',
+            'type' => 'phone',
+        );
+
+        $param = array(
+        'amount'   => '12.20',
+        'vendor_token' => '58xx',
+        'user_token' => '+33606060606',
+        'recipient' => '+33606060606',
+        'message' => 'hello',
+        'currency' => 'EUR',
+        'type' => 'phone',
+        );
+        
+        $param['signature'] = $this->makeSig($sigParam);
+        $jsonParam = json_encode($param);
+
+        $res = $client->request('POST', 'https://homologation.lydia-app.com/api/request/do.json', [
+            'json' => $jsonParam
+        ]);
+
+        //return new Response();
+        return $this->render('home/result.html.twig', [
+            'response' => $res,
+            'body' => $res->getBody(),
+            'param' => $param,
+            'json' => $jsonParam
+        ]); 
+    }
+
+    /**
+     * @Route("/test_body", name="test_body")
+     */
+    public function toTestBody()
+    {
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => 'https://homologation.lydia-app.com',
+            
+        ]);
+        $response = $client->post('/api/request/do.json');
+        
+
+        return $this->render('home/result.html.twig', [
+            'response' => $response,
+            'status_code' => $response->getStatusCode(),
+            'body' => $response->getBody(),
+
+        ]); 
+    }
 }
