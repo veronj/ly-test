@@ -169,66 +169,44 @@ class HomeController extends AbstractController
         ]); 
     }
 
+    public function jsonToFormData($array)
+    {
+        $converted = array();
+        foreach ($array as $key => $value)
+        {
+            $step = array(
+                'name' => $key,
+                'contents' => $value  
+            );
+            array_push($converted, $step);
+        }
+        return $converted;
+    }
+
     /**
      * @Route("/request_do", name="request_do")
      */
     public function request_do()
     {
         $client = new httpClient();
-        $sigParam = array(
-            'amount'   => '12.20',
-            'vendor_token' => '58385365be57f651843810',
-            'user_token' => '+33606060606',
-            'recipient' => '+33606060606',
-            'message' => 'hello',
-            'currency' => 'EUR',
-            'type' => 'phone',
-        );
-
+        
         $param = array(
-        'amount'   => '12.20',
+        'amount'   => '3.49',
         'vendor_token' => '58385365be57f651843810',
-        'user_token' => '+33606060606',
         'recipient' => '+33606060606',
-        'message' => 'hello',
+        'message' => 'tree fiddy',
         'currency' => 'EUR',
         'type' => 'phone',
         );
         
-        $param['signature'] = $this->makeSig($sigParam);
-        $jsonParam = json_encode($param);
-
-
         $response = $client->request('POST', 'https://homologation.lydia-app.com/api/request/do.json', [
-            'multipart' => [
-                [
-                    'name'     => 'amount',
-                    'contents' => '12.20'
-                ],
-                [
-                    'name'     => 'vendor_token',
-                    'contents' => '58385365be57f651843810'
-                ],
-
-                [
-                    'name'     => 'recipient',
-                    'contents' => '+33677985915'
-                ],
-                [
-                    'name'     => 'currency',
-                    'contents' => 'EUR'
-                ],
-                [
-                    'name'     => 'type',
-                    'contents' => 'phone'
-                ],
-            ]
+            'multipart' => $this->jsonToFormData($param)
         ]);
 
         return $this->render('home/result.html.twig', [
             'response' => $response,
             'body' => $response->getBody()->read(1024),
-
+            'param' => $param,
         ]);
     }
 
