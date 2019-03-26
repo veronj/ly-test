@@ -61,7 +61,7 @@ class HomeController extends AbstractController
         'currency' => 'EUR',
         'type' => 'phone',
         "recipient" => "+33600000001",
-        "vendor_token" => "xx",
+        "vendor_token" => "58385365be57f651843810",
         "user_token" => "+33600000001"
         ]);
 
@@ -104,7 +104,7 @@ class HomeController extends AbstractController
         }
                 
         // Concat the private token (provider one or vendor one) and has the result
-        $callSig = md5(implode("&", $sig)."58xx");
+        $callSig = md5(implode("&", $sig)."58385365c0157470110435");
 
         return $callSig;
     }
@@ -116,7 +116,7 @@ class HomeController extends AbstractController
     {
         $client = new httpClient();
         $param = array(
-            'vendor_token' => '58xx',
+            'vendor_token' => '58385365be57f651843810',
             'firstname' => 'jb',
             'lastname' => 'test',
             'email'   => 'user@email.com',
@@ -149,13 +149,13 @@ class HomeController extends AbstractController
         );
 
         $param = array(
-            'vendor_token' => '58xx',
+            'vendor_token' => '58385365be57f651843810',
             'firstname' => 'jb',
             'lastname' => 'test',
             'email'   => 'user@email.com',
             'phone' => '+33606060606',
             'password' => 'password',
-            'provider_token' => '58xx'
+            'provider_token' => '58385365be57f651843810'
         );
         
         $param['signature'] = $this->makeSig($sigParam);
@@ -169,7 +169,7 @@ class HomeController extends AbstractController
         ]); 
     }
 
-/**
+    /**
      * @Route("/request_do", name="request_do")
      */
     public function request_do()
@@ -177,7 +177,7 @@ class HomeController extends AbstractController
         $client = new httpClient();
         $sigParam = array(
             'amount'   => '12.20',
-            'vendor_token' => '58xx',
+            'vendor_token' => '58385365be57f651843810',
             'user_token' => '+33606060606',
             'recipient' => '+33606060606',
             'message' => 'hello',
@@ -187,7 +187,7 @@ class HomeController extends AbstractController
 
         $param = array(
         'amount'   => '12.20',
-        'vendor_token' => '58xx',
+        'vendor_token' => '58385365be57f651843810',
         'user_token' => '+33606060606',
         'recipient' => '+33606060606',
         'message' => 'hello',
@@ -198,17 +198,79 @@ class HomeController extends AbstractController
         $param['signature'] = $this->makeSig($sigParam);
         $jsonParam = json_encode($param);
 
-        $res = $client->request('POST', 'https://homologation.lydia-app.com/api/request/do.json', [
-            'json' => $jsonParam
+
+        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/request/do.json', [
+            'multipart' => [
+                [
+                    'name'     => 'amount',
+                    'contents' => '12.20'
+                ],
+                [
+                    'name'     => 'vendor_token',
+                    'contents' => '58385365be57f651843810'
+                ],
+
+                [
+                    'name'     => 'recipient',
+                    'contents' => '+33677985915'
+                ],
+                [
+                    'name'     => 'currency',
+                    'contents' => 'EUR'
+                ],
+                [
+                    'name'     => 'type',
+                    'contents' => 'phone'
+                ],
+            ]
         ]);
 
-        //return new Response();
         return $this->render('home/result.html.twig', [
-            'response' => $res,
-            'body' => $res->getBody(),
-            'param' => $param,
-            'json' => $jsonParam
-        ]); 
+            'response' => $response,
+            'body' => $response->getBody()->read(1024),
+
+        ]);
+    }
+
+    /**
+     * @Route("/request_list", name="request_list")
+     */
+    public function request_list()
+    {
+        $client = new httpClient();
+        $now = new \DateTime();
+        $date = $now->format('Y-m-d H');
+        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/payment/list.json', [
+            'multipart' => [
+                [
+                    'name'     => 'vendor_token',
+                    'contents' => '58385365be57f651843810'
+                ],
+                [
+                    'name'     => 'user_token',
+                    'contents' => '+33677985915'
+                ],
+                [
+                    'name'     => 'startDate',
+                    'contents' => '2018-01-01 00:00:00'
+                ],
+                [
+                    'name'     => 'endDate',
+                    'contents' => '2019-03-15 16:44:34'
+                ],
+            ]
+        ]);
+
+
+
+
+
+        return $this->render('home/result.html.twig', [
+            'response' => $response,
+            'body' => $response->getBody()->read(1024),
+            'date' => $now
+
+        ]);
     }
 
     /**
@@ -229,5 +291,188 @@ class HomeController extends AbstractController
             'body' => $response->getBody(),
 
         ]); 
+    }
+
+    /**
+     * @Route("/search", name="search")
+     */
+    public function search()
+    {
+        $client = new httpClient();
+
+        $param = array(
+            'vendor_token' => '58385365be57f651843810',
+            'firstname' => 'jb',
+            'lastname' => 'test',
+            'email'   => 'user@email.com',
+            'phone' => '0606060606',
+            'password' => 'password',
+        );
+
+
+        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/auth/register.json', [
+            'multipart' => [
+                [
+                    'name'     => 'vendor_token',
+                    'contents' => '58385365be57f651843810'
+                ],
+                [
+                    'name'     => 'firstname',
+                    'contents' => 'jb'
+                ],
+                [
+                    'name'     => 'lastname',
+                    'contents' => 'test'
+                ],
+                [
+                    'name'     => 'email',
+                    'contents' => 'user@email.com'
+                ],
+                [
+                    'name'     => 'phone',
+                    'contents' => '0606060606'
+                ],
+                [
+                    'name'     => 'password',
+                    'contents' => 'password'
+                ],
+
+            ]
+        ]);
+
+        //return new Response();
+        return $this->render('home/result.html.twig', [
+            'response' => $response,
+            'body' => $response->getBody()->read(1024),
+
+        ]);
+    }
+
+    /**
+     * @Route("/check", name="check")
+     */
+    public function check()
+    {
+        $client = new httpClient();
+
+
+
+
+
+        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/auth/vendortoken.json', [
+            'multipart' => [
+                [
+                    'name'     => 'vendor_token',
+                    'contents' => '58385365be57f651843810'
+                ],
+                [
+                    'name'     => 'vendor_id',
+                    'contents' => '58385365c0157470110435'
+                ],
+            ]
+        ]);
+
+        //return new Response();
+        return $this->render('home/result.html.twig', [
+            'response' => $response,
+            'body' => $response->getBody()->read(1024),
+
+        ]);
+    }
+
+    /**
+     * @Route("/auth", name="auth")
+     */
+    public function auth()
+    {
+        $client = new httpClient();
+
+        $param = array(
+            'vendor_token' => '58385365be57f651843810',
+            'firstname' => 'jb',
+            'lastname' => 'test',
+            'email'   => 'user@email.com',
+            'phone' => '0606060606',
+            'password' => 'password',
+        );
+
+
+        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/auth/login.json', [
+            'multipart' => [
+
+                [
+                    'name'     => 'phone',
+                    'contents' => '0606060606'
+                ],
+                [
+                    'name'     => 'password',
+                    'contents' => 'password'
+                ],
+
+            ]
+        ]);
+
+        //return new Response();
+        return $this->render('home/result.html.twig', [
+            'response' => $response,
+            'body' => $response->getBody()->read(1024),
+
+        ]);
+    }
+
+    /**
+     * @Route("/payment_ini", name="payment_ini")
+     */
+    public function payment_init()
+    {
+        $client = new httpClient();
+
+        $param = array(
+            'provider_token' => '58385365be57f651843810',
+            'amount' => '12.20',
+            'payer_info' => 'toto@email.com',
+            'recipient'   => 'pikachu@email.com',
+            'currency' => 'EUR',
+
+        );
+
+        $signature = $this->makeSig($param);
+
+
+
+        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/payment/init.json', [
+            'multipart' => [
+                [
+                    'name'     => 'amount',
+                    'contents' => '12.20'
+                ],
+                [
+                    'name'     => 'vendor_token',
+                    'contents' => '556728ae65bd6264713182'
+                ],
+                [
+                    'name'     => 'payer_info',
+                    'contents' => 'toto@email.com'
+                ],
+                [
+                    'name'     => 'recipient',
+                    'contents' => 'pikachu@email.com'
+                ],
+                [
+                    'name'     => 'currency',
+                    'contents' => 'EUR'
+                ],
+                [
+                    'name'     => 'signature',
+                    'contents' => $signature
+                ],
+            ]
+        ]);
+
+        return $this->render('home/result.html.twig', [
+            'response' => $response,
+            'body' => $response->getBody()->read(1024),
+
+        ]);
     }
 }
