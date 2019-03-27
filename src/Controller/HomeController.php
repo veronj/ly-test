@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Client;
-use App\Form\ClientType;
+
+use App\Entity\Customer;
+use App\Entity\PaymentRequest;
+use App\Form\PaymentRequestType;
 use GuzzleHttp\Client as httpClient;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -24,30 +26,68 @@ class HomeController extends AbstractController
     }
 
     /**
-     * @Route("/client", name="client")
+     * @Route("/customer", name="customer")
      */
-    public function client(Request $request, ObjectManager $em)
+    public function customer(Request $request, ObjectManager $em)
     {
 
-        $client = new Client();
-        $form = $this->createForm(ClientType::class, $client);
+        $paymentRequest = new PaymentRequest();
+        $form = $this->createForm(PaymentRequestType::class, $paymentRequest);
         
         $form->handleRequest($request);
 
          if ($form->isSubmitted() && $form->isValid())
         {
+            $data = $this->request_do($paymentRequest);
+                      
+            $paymentRequest->setRequestId($data->request_id);
+            $paymentRequest->setRequestUuid($data->request_uuid);
+            $paymentRequest->setMobileUrl($data->mobile_url);
+            $paymentRequest->setMessage($data->message);
+            $paymentRequest->setState(0);
 
-
-            $this->em->persist($client);
-            $this->em->flush();
-            return $this->redirectToRoute('home.client.index');
+            $em->persist($paymentRequest);
+            $em->flush();
+              
+            return $this->render('home/result.html.twig', [
+                
+                'paymentRequest' => $paymentRequest
+                
+            ]);
         }
 
         return $this->render('home/index.html.twig', [
-            'client' => $client,
+            'customer' => $paymentRequest,
             'form' => $form->createView()
         ]); 
     }
+
+    /**
+     * @Route("/request_do", name="request_do")
+     */
+    public function request_do(PaymentRequest $paymentRequest)
+    {
+        $client = new httpClient();
+        
+        $param = array(
+        'amount'   => '6.66',
+        'vendor_token' => '58385365be57f651843810',
+        'recipient' => $paymentRequest->GetEmail(),
+        'message' => 'tree fiddy',
+        'currency' => 'EUR',
+        'type' => 'email',
+        );
+        
+        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/request/do.json', [
+            'multipart' => $this->jsonToFormData($param)
+        ]);
+        $data = json_decode($response->getBody());
+
+        return $data;
+    }
+
+
+
 
     /**
      * @Route("/api", name="api")
@@ -183,33 +223,7 @@ class HomeController extends AbstractController
         return $converted;
     }
 
-    /**
-     * @Route("/request_do", name="request_do")
-     */
-    public function request_do()
-    {
-        $client = new httpClient();
-        
-        $param = array(
-        'amount'   => '3.49',
-        'vendor_token' => '58385365be57f651843810',
-        'recipient' => '+33606060606',
-        'message' => 'tree fiddy',
-        'currency' => 'EUR',
-        'type' => 'phone',
-        );
-        
-        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/request/do.json', [
-            'multipart' => $this->jsonToFormData($param)
-        ]);
-
-        return $this->render('home/result.html.twig', [
-            'response' => $response,
-            'body' => $response->getBody()->read(1024),
-            'param' => $param,
-        ]);
-    }
-
+    
     /**
      * @Route("/request_list", name="request_list")
      */
