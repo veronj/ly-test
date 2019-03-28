@@ -45,6 +45,9 @@ class HomeController extends AbstractController
             $paymentRequest->setMobileUrl($data->mobile_url);
             $paymentRequest->setMessage($data->message);
             $paymentRequest->setState(0);
+            $paymentRequest->setAmount(66.5);
+            $paymentRequest->setCurrency("EUR");
+            $paymentRequest->setCreatedAt(new \DateTime());
 
             $em->persist($paymentRequest);
             $em->flush();
@@ -57,7 +60,7 @@ class HomeController extends AbstractController
         }
 
         return $this->render('home/index.html.twig', [
-            'customer' => $paymentRequest,
+            'paymentRequest' => $paymentRequest,
             'form' => $form->createView()
         ]); 
     }
