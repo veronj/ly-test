@@ -14,6 +14,7 @@
 <th>Amount</th>
 <th>Currency</th>
 <th>Status</th>
+
 </tr>
 </thead>
 <tbody>
@@ -26,7 +27,7 @@
 <td>{{ payment.email}} </td>
 <td>{{ payment.amount}} </td>
 <td>{{ payment.currency}} </td>
-<td>{{ payment.state}} </td>
+<td><button class="btn btn-primary" href="{{ path('check_state', {'id': payment.id}) }}">{{ payment.getFormatedState }}</button></td>
 </tr>
 {% endfor %}
 </tbody>

@@ -45,7 +45,7 @@ class HomeController extends AbstractController
             $paymentRequest->setMobileUrl($data->mobile_url);
             $paymentRequest->setMessage($data->message);
             $paymentRequest->setState(0);
-            $paymentRequest->setAmount(66.5);
+            $paymentRequest->setAmount(12);
             $paymentRequest->setCurrency("EUR");
             $paymentRequest->setCreatedAt(new \DateTime());
 
@@ -73,7 +73,7 @@ class HomeController extends AbstractController
         $client = new httpClient();
         
         $param = array(
-        'amount'   => '6.66',
+        'amount'   => '12',
         'vendor_token' => '58385365be57f651843810',
         'recipient' => $paymentRequest->GetEmail(),
         'message' => 'tree fiddy',
@@ -88,6 +88,7 @@ class HomeController extends AbstractController
 
         return $data;
     }
+
 
 
 

@@ -25,4 +25,44 @@ class AdminController extends AbstractController
             'paymentRequests' => $paymentRequests
         ]);
     }
+
+    /**
+     * @Route("/check_state/{id}", name="check_state")
+     */
+    public function check_state(PaymentRequest $paymentRequest, ObjectManager $em)
+    {
+        $client = new httpClient();
+        
+        $param = array(
+        'request_id'   => $paymentRequest->GetRequestId(),
+        );
+        
+        $response = $client->request('POST', 'https://homologation.lydia-app.com/api/request/state.json', [
+            'multipart' => $this->jsonToFormData($param)
+        ]);
+        $data = json_decode($response->getBody());
+        
+        if ($data->state != $paymentRequest->getState())
+        {
+            $paymentRequest->setState($data->state);
+            $em->persist($paymentRequest);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('admin.index');
+    }
+    
+    public function jsonToFormData($array)
+    {
+        $converted = array();
+        foreach ($array as $key => $value)
+        {
+            $step = array(
+                'name' => $key,
+                'contents' => $value  
+            );
+            array_push($converted, $step);
+        }
+        return $converted;
+    }
 }

@@ -9,6 +9,15 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class PaymentRequest
 {
+
+    const STATE = [
+        0 => 'Pending',
+        1 => 'Accepted',
+        5 => 'Refused',
+        6 => 'Canceled',
+        -1 => 'Error'
+    ];
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -127,6 +136,11 @@ class PaymentRequest
     public function getState(): ?int
     {
         return $this->state;
+    }
+
+    public function getFormatedState(): ?string
+    {
+        return $this::STATE[$this->state];
     }
 
     public function setState(int $state): self
