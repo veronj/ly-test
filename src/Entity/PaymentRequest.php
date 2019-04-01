@@ -18,6 +18,14 @@ class PaymentRequest
         -1 => 'Error'
     ];
 
+    const CSS = [
+        0 => 'btn-primary',
+        1 => 'btn-success',
+        5 => 'btn-danger',
+        6 => 'btn-warning',
+        -1 => 'btn-basic'
+    ];
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -141,6 +149,11 @@ class PaymentRequest
     public function getFormatedState(): ?string
     {
         return $this::STATE[$this->state];
+    }
+
+    public function getCSSState(): ?string
+    {
+        return $this::CSS[$this->state];
     }
 
     public function setState(int $state): self

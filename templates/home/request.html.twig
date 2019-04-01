@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme form 'bootstrap_4_layout.html.twig' %}
+
+{% block title %}Payment request{% endblock %}
+
+{% block body %}
+
+<div class="container mt-4">
+    <h1>Send a payment request</h1>
+    <div class="row">
+        <div class="col-md-4">
+            {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <button type="submit" class="btn btn-primary">Send</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

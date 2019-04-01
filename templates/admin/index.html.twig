@@ -3,7 +3,12 @@
 {% block title %}Admin panel{% endblock %}
 
 {% block body %}
+<div class="container mt-4">
+<div class="row">
+<a href="{{ path('check_state_all') }}"><button class="btn btn-primary">Check status</button></a>
+</div>
 
+<div class="row mt-2">
 <table class="table table-striped">
 <thead>
 <tr>
@@ -27,11 +32,13 @@
 <td>{{ payment.email}} </td>
 <td>{{ payment.amount}} </td>
 <td>{{ payment.currency}} </td>
-<td><button class="btn btn-primary" href="{{ path('check_state', {'id': payment.id}) }}">{{ payment.getFormatedState }}</button></td>
+<td><a href="{{ path('check_state', {'id': payment.id}) }}"><button class="btn {{ payment.getCSSState }}">{{ payment.getFormatedState }}</button></a></td>
 </tr>
 {% endfor %}
 </tbody>
 
 </table>
+</div>
+</div>
 
 {% endblock %}

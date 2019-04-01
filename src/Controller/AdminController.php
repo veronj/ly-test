@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-
 use App\Entity\PaymentRequest;
 use GuzzleHttp\Client as httpClient;
 use App\Repository\PaymentRequestRepository;
@@ -27,9 +26,43 @@ class AdminController extends AbstractController
     }
 
     /**
+     * @Route("/check_state/all", name="check_state_all")
+     */
+    public function checkStateAll(PaymentRequestRepository $repo, ObjectManager $em)
+    {
+        $paymentRequests = $repo->findAll();
+
+        foreach ($paymentRequests as $paymentRequest)
+        {
+            if ($paymentRequest->GetState() === 0)
+            {
+                $client = new httpClient();
+        
+                $param = array(
+                'request_id'   => $paymentRequest->GetRequestId(),
+                );
+        
+                $response = $client->request('POST', 'https://homologation.lydia-app.com/api/request/state.json', [
+                    'multipart' => $this->jsonToFormData($param)
+                ]);
+                $data = json_decode($response->getBody());
+                
+                if ($data->state != $paymentRequest->getState())
+                {
+                    $paymentRequest->setState($data->state);
+                    $em->persist($paymentRequest);
+                    $em->flush();
+                }
+            }
+        }
+            
+        return $this->redirectToRoute('admin.index');
+    }
+
+    /**
      * @Route("/check_state/{id}", name="check_state")
      */
-    public function check_state(PaymentRequest $paymentRequest, ObjectManager $em)
+    public function checkState(PaymentRequest $paymentRequest, ObjectManager $em)
     {
         $client = new httpClient();
         

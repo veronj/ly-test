@@ -4,18 +4,20 @@
 {% block title %}Admin panel{% endblock %}
 
 {% block body %}
-<div class="row">
+<div class="container mt-4">
 
-<div class="card text-white bg-success mb-3" style="max-width: 18rem;">
-  <div class="card-header"></div>
-  <div class="card-body">
-    <h5 class="card-title">Request : </h5>
-    <h5 class="card-title">{{ paymentRequest.firstName }} {{ paymentRequest.lastName }}</h5>
-    
-    <p class="card-text">{{ paymentRequest.message }}</p>
-     <p class="card-text"><a href="{{ paymentRequest.mobileUrl }}">Payer</a></p>
-     
+<div class="row">
+  <div class="card text-white bg-success mb-6">
+      <div class="card-body">
+        <h5 class="card-title">Demande envoyée à {{ paymentRequest.firstName }} {{ paymentRequest.lastName }}</h5>
+        <p class="card-text">{{ paymentRequest.message }}</p>
+      </div>
   </div>
+</div>  
+<div class="row">
+  <a href="{{ paymentRequest.mobileUrl }}"><btn class="btn btn-primary mt-2">Payment</btn></a>
 </div>
+
+
 </div>
 {% endblock %}
