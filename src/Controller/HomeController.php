@@ -72,7 +72,7 @@ class HomeController extends AbstractController
         
         $param = array(
         'amount'   => '12',
-        'vendor_token' => '58385365be57f651843810',
+        'vendor_token' => getenv('VENDOR_TOKEN'),
         'recipient' => $paymentRequest->GetEmail(),
         'message' => 'Yummy pizza',
         'currency' => 'EUR',
